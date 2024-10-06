@@ -8,6 +8,11 @@
  */
 import { Ollama } from "@langchain/community/llms/ollama";
 import express from 'express';
+import { OllamaContainer } from "@testcontainers/ollama";
+
+// Run ollama containers
+const ollamaContainerWithLlama = await new OllamaContainer("ilopezluna/llama3.2:0.3.12-3b").start();
+const ollamaContainerWithPhi = await new OllamaContainer("ilopezluna/phi3.5:0.3.12-3.8b").start();
 
 // Create an Express app
 const app = express();
@@ -47,8 +52,8 @@ app.post('/query', async (req, res) => {
   console.log('☀️ Query:', query);
   try {
     const ollama = new Ollama({
-      baseUrl: "http://localhost:11434",
-      model: "llama3",
+      baseUrl: ollamaContainerWithLlama.getEndpoint(),
+      model: "llama3.2:3b",
     });
     
     const response = await ollama.invoke(query);
@@ -67,11 +72,11 @@ app.post('/query', async (req, res) => {
 app.post('/query2', async (req, res) => {
   let query = req.body.query;
   query = "context: " + context + ". " + query
-  console.log('☀️ Query for phi3:', query);
+  console.log('☀️ Query for phi3.5:', query);
   try {
     const ollama = new Ollama({
-      baseUrl: "http://localhost:11434",
-      model: "phi3",
+      baseUrl: ollamaContainerWithPhi.getEndpoint(),
+      model: "phi3.5:3.8b",
     });
     
     const response = await ollama.invoke(query);
